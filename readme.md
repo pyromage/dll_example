@@ -1,6 +1,6 @@
 Example of building a double linked list
 
-This implementation is in Go and uses a Generics to work with many types.  The nodes maintain a double linked list with ordering constraint most recently used to least recently inserted from head to tail. The list can set to enforce a maximum number of nodes or unbounded.
+This implementation is in Go and uses Generics to work with many types.  The nodes maintain a double linked list with ordering constraint most to least recently inserted starting from head and going to tail. The list can set to enforce a maximum number of nodes or unbounded.
 
 ``` 
     head -> [Node *] <--> [Node *] <--> [Node *] <--> [Node *] <--> [Node *] <- tail
@@ -30,6 +30,8 @@ Adding or removing nodes involves setting the pointers for head and/or tail as w
 
 **Limitations**
 * Does not currently support multi-threaded access
+* No option to sort the list in any other way
+* Have not implemented an efficient search using hashes/maps/trees for intermediate nodes
 
 **Testing**
 * 100% code coverage
