@@ -22,8 +22,8 @@ type testLists struct {
 	
 }
 
-
-// Need to finish
+// Good practice is unit tests should not use any other methods from the package, so
+// create a test set of lists we will use for unit testing
 func createUnitTestStaticList(sizeStaticList, max int) *testLists {
 	var lists testLists
 
@@ -91,7 +91,7 @@ func createUnitTestStaticList(sizeStaticList, max int) *testLists {
 	return &lists
 }
 
-// Verifies the integrity of the list
+// Verifies the integrity of any list by traversing it both ways, checking pointers etc.
 func (l *List[T])isValid()bool{
 	switch { 
 	case l.head == nil && l.tail == nil :
@@ -162,7 +162,6 @@ func TestNew (t *testing.T) {
 
 }
 
-// unit test add at the tail
 func TestAppend(t *testing.T) {
 	var list List[int] 	// note max size will be 0 (infinite)
 
@@ -202,7 +201,6 @@ func TestAppend(t *testing.T) {
 	}
 }
 
-// unit test add at the head
 func TestPrepend(t *testing.T){
 	var list List[string] 	// note max size will be 0 (infinite)
 
@@ -242,7 +240,6 @@ func TestPrepend(t *testing.T){
 	}
 }
 
-// unit test length
 func TestLength(t *testing.T) {
 //	type testNode [5]int
 	var list List[testNode]
@@ -255,6 +252,7 @@ func TestLength(t *testing.T) {
 		return
 	}
 
+	// See if new puts in the right length
 	list2 := New[int](5)
 	if list2 == nil {
 		t.Error("creating list2 using new failed")
@@ -267,8 +265,6 @@ func TestLength(t *testing.T) {
 		return
 	}
 }
-
-
 
 func TestPopHead(t *testing.T){
 	var tmp List[int]
@@ -333,7 +329,6 @@ func TestPopHead(t *testing.T){
 	}
 }
 
-// test popping the tail
 func TestPopTail(t *testing.T){
 	var tmp List[int]
 
@@ -392,7 +387,6 @@ func TestPopTail(t *testing.T){
 	}
 }
 
-// return the index of the first node with value, error != nil will indicate nothing found
 func TestGetIndex(t *testing.T) {
 	var tmp List[[5]int]
 
