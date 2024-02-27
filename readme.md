@@ -9,17 +9,17 @@ This implementation is in Go and uses Generics to work with many types.  The nod
 
 **Methods**
 * New
-* Append
-* Prepend
+* PushTail
+* PushHead
 * PopHead
 * PopTail
 * Length
-* GetIndex
+* Seek
 * Print
 
 **Complexity**
-* Append, Prepend, PopHead, PopTail, Length, New are O(1)
-* GetIndex is O(n) but will search only half the list, from either head or tail whichever is closest
+* PushTail, PushHead, PopHead, PopTail, Length, New are O(1)
+* Seek is O(n) but will search only half the list, from either head or tail whichever is closest
 * Print is O(n) - obviously to traverse the structure
 
 **Algorithm**

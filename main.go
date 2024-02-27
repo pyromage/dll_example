@@ -11,23 +11,23 @@ func main(){
 
 	list := dbl_list.New[string](10)
 
-	ok := list.Append("Tail")
+	ok := list.PushTail("Tail")
 
 	if !ok {
-		fmt.Println("Failed to append")
+		fmt.Println("Failed to PushTail")
 	}
 
-	ok = list.Prepend("Head")
+	ok = list.PushHead("Head")
 
 	if !ok {
-		fmt.Println("Failed to prepend")
+		fmt.Println("Failed to PushHead")
 	}
  
 	// Print the full debug output, should be the full list
 	list.Print(true)
 
 
-	ele := list.GetIndex(1)
+	ele := list.Seek(1)
 	
 	if ele == nil {
 		fmt.Println("Failed to get by index")

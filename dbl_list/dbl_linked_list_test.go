@@ -3,6 +3,7 @@ package dbl_list
 import (
 	"fmt"
 	"math/rand"
+	"strconv"
 	"testing"
 )
 
@@ -23,17 +24,18 @@ type testLists struct {
 }
 
 // Good practice is unit tests should not use any other methods from the package, so
-// create a test set of lists we will use for unit testing
+// create a test set of lists we will use for unit testing without PushTail...
 func createUnitTestStaticList(sizeStaticList, max int) *testLists {
 	var lists testLists
 
 	if sizeStaticList > max && max != 0 {
-		return nil
+		// limit the size, used for benchmarking
+		sizeStaticList = max
 	} 
 	for i := 0 ; i < sizeStaticList; i++ {
 
 		blob_int := i
-		blob_str := string(fmt.Sprintf("%d",i))
+		blob_str := string(strconv.Itoa(i))
 		blob_node := testNode{num: i, str: blob_str, b: true}
 		blob_arr := [maxArrSize]int{}
 		for j := 0 ; j < maxArrSize; j++ {
@@ -162,7 +164,7 @@ func TestNew (t *testing.T) {
 
 }
 
-func TestAppend(t *testing.T) {
+func TestPushTail(t *testing.T) {
 	var list List[int] 	// note max size will be 0 (infinite)
 
 	if !list.isValid() {
@@ -171,13 +173,13 @@ func TestAppend(t *testing.T) {
 	}
 
 	for i := 0 ; i < 5 ; i++ {
-		if !list.Append(i) {
-			t.Errorf("Append(%d) failed %v",i,list)
+		if !list.PushTail(i) {
+			t.Errorf("PushTail(%d) failed %v",i,list)
 			return
 		}
 
 		if !list.isValid() ||  *list.head.blob != 0 || *list.tail.blob != i {
-			t.Errorf("Append(%d) list not correct: %v",i,list)
+			t.Errorf("PushTail(%d) list not correct: %v",i,list)
 			return
 		}
 	}
@@ -190,18 +192,18 @@ func TestAppend(t *testing.T) {
 	}
 
 	for i := 0 ; i < 4 ; i++ {
-		if !list2.Append(i) || !list2.isValid() ||  *list2.head.blob != 0 || *list2.tail.blob != i {
-			t.Errorf("Append(%d) failed %v",i,list2)
+		if !list2.PushTail(i) || !list2.isValid() ||  *list2.head.blob != 0 || *list2.tail.blob != i {
+			t.Errorf("PushTail(%d) failed %v",i,list2)
 			return
 		}
 	}
 
-	if list2.Append(5){
-		t.Errorf("Append beyond max of size 4 should fail %v",list2)
+	if list2.PushTail(5){
+		t.Errorf("PushTail beyond max of size 4 should fail %v",list2)
 	}
 }
 
-func TestPrepend(t *testing.T){
+func TestPushHead(t *testing.T){
 	var list List[string] 	// note max size will be 0 (infinite)
 
 	if !list.isValid() {
@@ -210,12 +212,12 @@ func TestPrepend(t *testing.T){
 	}
 
 	for _,i := range []string{"1","2","3","4","5"} {
-		if !list.Prepend(i) {
-			t.Errorf("Prepend(%v) failed %v",i,list)
+		if !list.PushHead(i) {
+			t.Errorf("PushHead(%v) failed %v",i,list)
 			return
 		}
 		if !list.isValid() ||  *list.head.blob != i || *list.tail.blob != "1" {
-			t.Errorf("Prepend(%v) list not correct: %v",i,list)
+			t.Errorf("PushHead(%v) list not correct: %v",i,list)
 			return
 		}
 	}
@@ -229,14 +231,14 @@ func TestPrepend(t *testing.T){
 
 
 	for _,i := range []string{"1","2","3","4"} {
-		if !list2.Prepend(i) || !list2.isValid() ||  *list2.head.blob != i || *list2.tail.blob != "1" {
-			t.Errorf("Prepend(%v) failed %v",i,list2)
+		if !list2.PushHead(i) || !list2.isValid() ||  *list2.head.blob != i || *list2.tail.blob != "1" {
+			t.Errorf("PushHead(%v) failed %v",i,list2)
 			return
 		}
 	}
 
-	if list2.Prepend("5"){
-		t.Errorf("Prepend beyond max of size 4 should fail %v",list2)
+	if list2.PushHead("5"){
+		t.Errorf("PushHead beyond max of size 4 should fail %v",list2)
 	}
 }
 
@@ -387,30 +389,30 @@ func TestPopTail(t *testing.T){
 	}
 }
 
-func TestGetIndex(t *testing.T) {
+func TestSeek(t *testing.T) {
 	var tmp List[[5]int]
 
 	// test the empty list
-	if tmp.GetIndex(0) != nil {
-		t.Error("getting node idx for empty list failed")
+	if tmp.Seek(0) != nil {
+		t.Error("seek for empty list failed")
 	}
 
 	lists := createUnitTestStaticList(1,1)
 
 	// try to get the value of the element
-	ele := lists.intList.GetIndex(0)
+	ele := lists.intList.Seek(0)
 
 	if ele == nil {
 		t.Error("could not get the element in a single element list")
 	} else if *ele != 0 {
-		t.Errorf("Get of single element list incorrect for idx %d, expected %v, got %v",0,1, ele)
+		t.Errorf("Seek of single element list incorrect for idx %d, expected %v, got %v",0,1, ele)
 	}
 
 	// try to go past the end of the one element
-	ele = lists.intList.GetIndex(1)
+	ele = lists.intList.Seek(1)
 
 	if ele != nil {
-		t.Error("getting idx 1 from list of only one element should fail")
+		t.Error("Seek idx 1 from list of only one element should fail")
 	}
 
 	// Create a list of multiple elements
@@ -418,27 +420,37 @@ func TestGetIndex(t *testing.T) {
 
 	// check the indexes
 	for i := 0; i < lists.intList.Length(); i++ {
-		ele = lists.intList.GetIndex(i)
+		ele = lists.intList.Seek(i)
 
 		if ele == nil {
-			t.Errorf("GetValueByIndex[%d] failed",i)
+			t.Errorf("Seek failed for idx: %d",i)
 		} else if *ele != i {
-			t.Errorf("Get by index incorrect for idx %d, expected %v, got %v",i,i, *ele)
+			t.Errorf("Seek incorrect for idx: %d expected: %v got: %v",i,i, *ele)
 		}
 	}
 
 	// Negative test : idx is -1 and idx is 1 past the end
-	ele = lists.intList.GetIndex(-1)
+	ele = lists.intList.Seek(-1)
 
 	if ele != nil {
-		t.Error("GetByIdx -1 should always fail")
+		t.Error("Seek -1 should always fail")
 	}
 
 	// indexed by 0, so length will be 1 past the end
-	ele = lists.intList.GetIndex(5)
+	ele = lists.intList.Seek(5)
 
 	if ele != nil {
-		t.Error("GetByIdx past the end should always fail")
+		t.Error("Seek past the end should always fail")
+	}
+
+	// intentionally corrupt the structure to be cyclic to make sure it stops
+	lists.intList.head.prev = lists.intList.tail
+	lists.intList.tail.next = lists.intList.head
+
+	ele = lists.intList.Seek(3)
+
+	if ele == nil {
+		t.Error("Seek of corrupted structure should fail")
 	}
 }
 
@@ -456,23 +468,30 @@ func TestPrint(t *testing.T) {
 	lists.stcList.Print(true)
 	lists.arrList.Print(true)
 
+	// intentionally corrupt the structure to be cyclic to make sure it stops
+	lists.intList.head.prev = lists.intList.tail
+	lists.intList.tail.next = lists.intList.head
+	lists.intList.Print(true)
+
 }
 
 func BenchmarkPushPop(b *testing.B) {
 	var arrValues [maxArrSize]int
 
-	lists := createUnitTestStaticList(1,1000)
+	lists := createUnitTestStaticList(1,b.N)
 
-	// bunch of appends/prepends
+	b.ResetTimer()
+
+	// bunch of PushTails/PushHeads
 	for i := 0 ; i < b.N ; i ++{
-		lists.arrList.Append(arrValues)
-		lists.intList.Append(i)
-		lists.strList.Append(fmt.Sprint(1000*i))
-		lists.stcList.Append(testNode{i,fmt.Sprint(i),i%2==0})
-		lists.arrList.Prepend(arrValues)
-		lists.intList.Prepend(i)
-		lists.strList.Prepend(fmt.Sprint(1000*i))
-		lists.stcList.Prepend(testNode{i,fmt.Sprint(i),i%2==0})
+		lists.arrList.PushTail(arrValues)
+		lists.intList.PushTail(i)
+		lists.strList.PushTail(strconv.Itoa(1000*i))
+		lists.stcList.PushTail(testNode{i,strconv.Itoa(i),i%2==0})
+		lists.arrList.PushHead(arrValues)
+		lists.intList.PushHead(i)
+		lists.strList.PushHead(strconv.Itoa(1000*i))
+		lists.stcList.PushHead(testNode{i,strconv.Itoa(i),i%2==0})
 	}
 
 	// bunch of pops
@@ -488,21 +507,57 @@ func BenchmarkPushPop(b *testing.B) {
 	}
 }
 
-func BenchmarkAppend(b *testing.B){
-	var list List[int]
+func BenchmarkPushHead(b *testing.B){
+	list := createUnitTestStaticList(1,1000000)
+
+	b.ResetTimer()
 
 	for i := 0 ; i < b.N ; i++ {
-		list.Append(i)
+		list.intList.PushHead(i)
 	}
 }
 
-func BenchmarkGetIndex( b *testing.B) {
+func BenchmarkPushTail(b *testing.B){
+	list := createUnitTestStaticList(1,1000000)
 
-	list := createUnitTestStaticList(100,200)
+	b.ResetTimer()
+
+	for i := 0 ; i < b.N ; i++ {
+		list.intList.PushTail(i)
+	}
+}
+
+func BenchmarkPopHead(b *testing.B){
+
+	list := createUnitTestStaticList(b.N,1000000)
+
+	b.ResetTimer()
+
+	for i := 0 ; i < b.N ; i++ {
+		list.intList.PopHead()
+	}
+}
+
+func BenchmarkPopTail(b *testing.B){
+
+	list := createUnitTestStaticList(b.N,1000000)
+
+	b.ResetTimer()
+
+	for i := 0 ; i < b.N ; i++ {
+		list.intList.PopTail()
+	}
+}
+
+func BenchmarkSeek( b *testing.B) {
+
+	list := createUnitTestStaticList(2*b.N,1000000)
+
+	b.ResetTimer()
 
 	for i := 0 ; i < b.N ; i++ {
 		r := rand.Intn(100)
-		list.intList.GetIndex(r)
+		list.intList.Seek(r)
 	} 
 
 }
